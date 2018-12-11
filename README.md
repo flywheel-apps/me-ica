@@ -1,2 +1,2 @@
-# me-ica
-Flywheel Gear to Execute Multi-Echo ICA
+# flywheel/me-ica
+Flywheel Gear to Execute Multi-Echo ICA.

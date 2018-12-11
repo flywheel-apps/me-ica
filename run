@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source /etc/afni/afni.sh
+python /flywheel/v0/run_meica.py
+exit $?
