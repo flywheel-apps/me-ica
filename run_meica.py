@@ -4,6 +4,7 @@ import os
 import re
 import csv
 import json
+import shutil
 import string
 import logging
 import datetime
@@ -44,7 +45,7 @@ def get_meica_data(config, output_directory='/flywheel/v0/output'):
 
         meica_data.append({
                 "path": n.name,
-                "te": echo_time*1000
+                "te": echo_time*1000 # Convert to ms
             })
 
     # Generate prefix
@@ -65,7 +66,6 @@ if __name__ == '__main__':
     import shlex
     import subprocess
 
-    pprint.pprint(dict(os.environ))
     log.setLevel(getattr(logging, 'DEBUG'))
     logging.getLogger('MEICA').setLevel(logging.INFO)
     log.info('  start: %s' % datetime.datetime.utcnow())
@@ -105,23 +105,30 @@ if __name__ == '__main__':
     ############################################################################
     # RUN MEICA
 
-    dataset_string = '-d %s' % (','.join([ x['path'] for x in meica_data ]))
-    echo_string = '-e %s' % (','.join([ str(x['te']) for x in meica_data ]))
+    dataset_cmd = '-d %s' % (','.join([ x['path'] for x in meica_data ]))
+    echo_cmd = '-e %s' % (','.join([ str(x['te']) for x in meica_data ]))
 
-    anatomical_string = '-a %s' % (anatomical_nifti) if anatomical_nifti else ''
-    mni_string = '--MNI' if mni else ''
+    anatomical_cmd = '-a %s' % (anatomical_nifti) if anatomical_nifti else ''
+    mni_cmd = '--MNI' if mni else ''
 
-    command = 'cd %s && meica.py %s %s %s %s %s --prefix %s' % ( output_directory,
-                                                                dataset_string,
-                                                                echo_string,
-                                                                basetime,
-                                                                anatomical_string,
-                                                                mni_string,
-                                                                prefix )
+    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s --prefix %s' % (
+                output_directory, dataset_cmd, echo_cmd, basetime, anatomical_cmd, mni_cmd, prefix )
 
     log.info(command)
     status = os.system(command)
 
-    log.info('  stop: %s' % datetime.datetime.utcnow())
+    if status == 0:
+        log.info('Success. Compressing outputs...')
+        dirs = [ os.path.join(output_directory, x)
+                        for x in os.listdir(output_directory)
+                        if os.path.isdir(os.path.join(output_directory, x))
+                ]
+        for d in dirs:
+            out_zip = os.path.join(output_directory, os.path.basename(d))
+            log.info('Generating %s... ' % (out_zip))
+            shutil.make_archive(out_zip, 'zip', root_dir=output_directory, base_dir=os.path.basename(d), verbose=True)
+            shutil.rmtree(d)
+
+    log.info('Done: %s' % datetime.datetime.utcnow())
 
     os.sys.exit(status)

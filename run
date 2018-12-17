@@ -1,5 +1,10 @@
 #!/bin/bash
 
 source /etc/afni/afni.sh
+Xvfb :88 -screen 0 1024x768x24 >& /dev/null &
+export DISPLAY=:88
+export PYTHON_PATH=$PYTHON_PATH:/flywheel/v0/me-ica/
 python /flywheel/v0/run_meica.py
-exit $?
+exit_status=$?
+killall Xvfb
+exit $exit_status
