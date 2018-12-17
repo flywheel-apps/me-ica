@@ -7,16 +7,45 @@ Multi-Echo Independent Components Analysis (ME-ICA) is a method for fMRI analysi
   > Kundu, P., Inati, S.J., Evans, J.W., Luh, W.M. & Bandettini, P.A. Differentiating BOLD and non-BOLD signals in fMRI time series using multi-echo EPI. NeuroImage (2011).
 
 
-## Usage notes
+``meica`` preprocesses multi-echo datasets and applies multi-echo ICA based on spatially concatenated echoes. It does so in the following steps:
+
+1. Calculates motion parameters based on images with highest contrast (usually the first echo)
+2. Applies motion correction and T2*-weighted co-registration parameters
+3. Applies standard EPI preprocessing (slice-time correction, etc.)
+4. Computes PCA and ICA in conjunction with TE-dependence analysis
+
+##  Derivatives
+  * ``medn``
+      'Denoised' BOLD time series after: basic preprocessing,
+      T2* weighted averaging of echoes (i.e. 'optimal combination'),
+      ICA denoising.
+      Use this dataset for task analysis and resting state time series correlation analysis.
+  * ``tsoc``
+      'Raw' BOLD time series dataset after: basic preprocessing
+      and T2* weighted averaging of echoes (i.e. 'optimal combination').
+      'Standard' denoising or task analyses can be assessed on this dataset
+      (e.g. motion regression, physio correction, scrubbing, etc.)
+      for comparison to ME-ICA denoising.
+  * ``*mefc``
+      Component maps (in units of \delta S) of accepted BOLD ICA components.
+      Use this dataset for ME-ICR seed-based connectivity analysis.
+  * ``mefl``
+      Component maps (in units of \delta S) of ALL ICA components.
+  * ``ctab``
+      Table of component Kappa, Rho, and variance explained values, plus listing of component classifications.
+
+
+## Flywheel Usage notes
 This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-echo functional data within a given acquisition. Please read and understand the following considerations prior to running the Gear on your data.
 
-#### Input
+### Input
 * The user must provide a single input file (DICOM archive containing multi-echo data) from the acquisition on which they wish this Gear to run. The Gear will use that single input file to identify other data within that acquisition to use as input to the algorithm.
+* The user may optionally provide an anatomical NIfTI file along with the functional input. Used for co-registration.
 
-#### Configuration
+### Configuration
 * Several configuration parameters can be set at runtime. Please see the `manifest.json` file for the list of parameters and their options.
 
-#### Prior to Execution
+### Prior to Execution
 * Data within the acquisition must have a Classification set for each file. The easiest way to do this is to run the `scitran/dicom-mr-classifer` Gear on those data prior to running the DICOM conversion Gear (dcm2niix). The "Classifier" Gear will set the input file's classification, upon which this Gear depends.
 
 * Once the classification is set, NIfTI files must be generated for data within the acquisition using the `scitran/dcm2niix` Gear (>=0.6). The `dcm2niix` Gear generates file metadata used to set the echo times for each of the given functional inputs.
