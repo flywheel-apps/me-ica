@@ -148,7 +148,11 @@ if __name__ == '__main__':
     # INPUTS
 
     if config['inputs'].get('anatomical'): # Optional
-        anatomical_nifti = config['inputs'].get('anatomical').get('location').get('path')
+        anatomical_input = config['inputs'].get('anatomical').get('location').get('path')
+
+        # Anatomical nifti should be in the output directory when running meica
+        anatomical_nifti = os.path.join(output_directory, os.path.basename(anatomical_input))
+        shuti.copyfile(anatomical_input, anatomical_nifti)
     else:
         anatomical_nifti = ''
 
