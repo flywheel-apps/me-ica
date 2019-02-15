@@ -150,7 +150,7 @@ if __name__ == '__main__':
     if config['inputs'].get('anatomical'): # Optional
         anatomical_input = config['inputs'].get('anatomical').get('location').get('path')
 
-        # Anatomical nifti should be in the output directory when running meica
+        # Anatomical nifti must be in the output directory when running meica
         anatomical_nifti = os.path.join(output_directory, os.path.basename(anatomical_input))
         shuti.copyfile(anatomical_input, anatomical_nifti)
     else:
@@ -162,6 +162,10 @@ if __name__ == '__main__':
 
     basetime = config.get('config').get('basetime') # Default = "0"
     mni = config.get('config').get('mni') # Default = False
+    tr = config.get('config').get('tr', '') # No default
+    cpus = config.get('config').get('cpus')
+    no_axialize = config.get('config').get('no_axialize')
+    keep_int = config.get('config').get('keep_int')
 
 
     ############################################################################
@@ -169,12 +173,28 @@ if __name__ == '__main__':
 
     dataset_cmd = '-d %s' % (','.join([ x['path'] for x in meica_data ]))
     echo_cmd = '-e %s' % (','.join([ str(x['te']) for x in meica_data ]))
-
     anatomical_cmd = '-a %s' % (anatomical_nifti) if anatomical_nifti else ''
     mni_cmd = '--MNI' if mni else ''
+    tr_cmd = '--TR %s' % (str(tr)) if tr else ''
+    cpus_cmd = '--CPUS %s' % (str(cpus)) if cpus else ''
+    no_axialize_cmd = '--no_axialize' if no_axialize else ''
+    keep_int_cmd = '--keep_int' if keep_int else ''
+    tpattern_cmd = '--tpattern=%s' % (tpattern_file) if tpattern_file else ''
 
-    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s --prefix %s' % (
-                output_directory, dataset_cmd, echo_cmd, basetime, anatomical_cmd, mni_cmd, prefix )
+
+    % Run
+    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s --prefix %s' % ( output_directory,
+            dataset_cmd,
+            echo_cmd,
+            basetime,
+            anatomical_cmd,
+            mni_cmd,
+            tr_cmd,
+            cpus_cmd,
+            no_axialize_cmd,
+            keep_int_cmd,
+            tpattern_cmd,
+            prefix )
 
     log.info(command)
     status = os.system(command)
