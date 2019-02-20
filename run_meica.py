@@ -218,7 +218,7 @@ if __name__ == '__main__':
     status = os.system(command)
 
     if status == 0:
-        log.info('Success. Compressing outputs...')
+        log.info('Command exited with 0 status. Compressing outputs...')
         dirs = [ os.path.join(output_directory, x)
                         for x in os.listdir(output_directory)
                         if os.path.isdir(os.path.join(output_directory, x))
