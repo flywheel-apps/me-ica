@@ -65,7 +65,7 @@ def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True, deflate=True):
         for fileName in fileNames:
             filePath = os.path.join(archiveDirPath, fileName)
             outFile.write(filePath, trimPath(filePath))
-        #Make sure we get empty directories as well
+        # Make sure we get empty directories as well
         if not fileNames and not dirNames:
             zipInfo = zipfile.ZipInfo(trimPath(archiveDirPath) + "/")
             outFile.writestr(zipInfo, "")
@@ -92,11 +92,17 @@ def get_meica_data(config, output_directory='/flywheel/v0/output'):
 
     # Compile meica_data structure
     meica_data = []
+    slice_timing = []
+    repetition_time = ''
     for n in nifti_files:
         file_path = os.path.join(output_directory, n.name)
         log.info('Downloading %s' % (n.name))
         fw.download_file_from_acquisition(acquisition.id, n.name, file_path)
         echo_time = n.info.get('EchoTime')
+        if not slice_timing:
+            slice_timing = n.info.get('SliceTiming')
+        if not repetition_time:
+            repetition_time = n.info.get('RepetitionTime')
         # TODO: Handle case where EchoTime is not here
         # or classification is not correct
         # Or not multi echo data
@@ -111,7 +117,17 @@ def get_meica_data(config, output_directory='/flywheel/v0/output'):
     label = acquisition.label.strip().replace(' ','')
     prefix = '%s_%s' % (sub_code, label)
 
-    return sorted(meica_data, key=lambda k: k['te']), prefix
+    # Generate tpattern_file
+    if slice_timing:
+        log.info('Generating slice timing information from input file metadata.')
+        tpattern_file = os.path.join(output_directory, 'slicetimes.txt')
+        with open(tpattern_file, 'w') as tf:
+            for st in slice_timing:
+                tf.write("%s " % st)
+    else:
+        tpattern_file = ''
+
+    return sorted(meica_data, key=lambda k: k['te']), prefix, tpattern_file, repetition_time
 
 
 if __name__ == '__main__':
@@ -141,7 +157,7 @@ if __name__ == '__main__':
     # FIND AND DOWNLOAD DATA
 
     output_directory = '/flywheel/v0/output'
-    meica_data, prefix = get_meica_data(config, output_directory)
+    meica_data, prefix, tpattern_file, repetition_time = get_meica_data(config, output_directory)
 
 
     ############################################################################
@@ -152,7 +168,7 @@ if __name__ == '__main__':
 
         # Anatomical nifti must be in the output directory when running meica
         anatomical_nifti = os.path.join(output_directory, os.path.basename(anatomical_input))
-        shuti.copyfile(anatomical_input, anatomical_nifti)
+        shutil.copyfile(anatomical_input, anatomical_nifti)
     else:
         anatomical_nifti = ''
 
@@ -163,6 +179,8 @@ if __name__ == '__main__':
     basetime = config.get('config').get('basetime') # Default = "0"
     mni = config.get('config').get('mni') # Default = False
     tr = config.get('config').get('tr', '') # No default
+    if not tr and repetition_time:
+        tr = repetition_time
     cpus = config.get('config').get('cpus')
     no_axialize = config.get('config').get('no_axialize')
     keep_int = config.get('config').get('keep_int')
@@ -173,16 +191,16 @@ if __name__ == '__main__':
 
     dataset_cmd = '-d %s' % (','.join([ x['path'] for x in meica_data ]))
     echo_cmd = '-e %s' % (','.join([ str(x['te']) for x in meica_data ]))
-    anatomical_cmd = '-a %s' % (anatomical_nifti) if anatomical_nifti else ''
+    anatomical_cmd = '-a %s' % (os.path.basename(anatomical_nifti)) if anatomical_nifti else ''
     mni_cmd = '--MNI' if mni else ''
     tr_cmd = '--TR %s' % (str(tr)) if tr else ''
-    cpus_cmd = '--CPUS %s' % (str(cpus)) if cpus else ''
+    cpus_cmd = '--cpus %s' % (str(cpus)) if cpus else ''
     no_axialize_cmd = '--no_axialize' if no_axialize else ''
     keep_int_cmd = '--keep_int' if keep_int else ''
-    tpattern_cmd = '--tpattern=%s' % (tpattern_file) if tpattern_file else ''
+    tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file else ''
 
 
-    % Run
+    # Run the command
     command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s --prefix %s' % ( output_directory,
             dataset_cmd,
             echo_cmd,
@@ -208,7 +226,6 @@ if __name__ == '__main__':
         for d in dirs:
             out_zip = os.path.join(output_directory, os.path.basename(d) + '.zip')
             log.info('Generating %s... ' % (out_zip))
-            # shutil.make_archive(out_zip, 'zip', root_dir=output_directory, base_dir=os.path.basename(d), verbose=True)
             zipdir(d, out_zip, os.path.basename(d))
             shutil.rmtree(d)
 
