@@ -1,13 +1,14 @@
 # Create a base docker container that will run ME-ICA
 #
 
-FROM neurodebian:xenial
+FROM neurodebian:bionic
 MAINTAINER Flywheel <support@flywheel.io>
 
 
 # Install dependencies
+ARG DEBIAN_FRONTEND=noninteractive
 RUN echo deb http://neurodeb.pirsquared.org data main contrib non-free >> /etc/apt/sources.list.d/neurodebian.sources.list \
-    && echo deb http://neurodeb.pirsquared.org xenial main contrib non-free >> /etc/apt/sources.list.d/neurodebian.sources.list
+    && echo deb http://neurodeb.pirsquared.org bionic main contrib non-free >> /etc/apt/sources.list.d/neurodebian.sources.list
 RUN apt-get update \
     && apt-get install -y afni \
                           python \
@@ -16,8 +17,9 @@ RUN apt-get update \
                           python-scipy \
                           python-pip \
                           xvfb \
-                          psmisc \
-    && pip install --upgrade flywheel-sdk
+                          psmisc
+
+RUN pip install --upgrade flywheel-sdk>=5.0.2
 
 # Make directory for flywheel spec (v0)
 ENV FLYWHEEL /flywheel/v0

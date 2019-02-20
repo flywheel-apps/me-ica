@@ -36,18 +36,53 @@ Multi-Echo Independent Components Analysis (ME-ICA) is a method for fMRI analysi
 
 
 ## Flywheel Usage notes
-This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-echo functional data within a given acquisition. Please read and understand the following considerations prior to running the Gear on your data.
+This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-echo functional data within a given acquisition.
+
+*Please read and understand the following considerations prior to running the Gear on your data.*
 
 ### Input
 * The user must provide a single input file (DICOM archive containing multi-echo data) from the acquisition on which they wish this Gear to run. The Gear will use that single input file to identify other data within that acquisition to use as input to the algorithm.
-* The user may optionally provide an anatomical NIfTI file along with the functional input. Used for co-registration.
-
-### Configuration
-* Several configuration parameters can be set at runtime. Please see the `manifest.json` file for the list of parameters and their options.
+* The user may optionally provide an anatomical NIfTI file along with the functional input. This input, if provided, will be used for co-registration.
 
 ### Prior to Execution
-* Data within the acquisition must have a Classification set for each file. The easiest way to do this is to run the `scitran/dicom-mr-classifer` Gear on those data prior to running the DICOM conversion Gear (dcm2niix). The "Classifier" Gear will set the input file's classification, upon which this Gear depends.
+* **Data within the acquisition must have a Classification set for each file.** The easiest way to do this is to run the `scitran/dicom-mr-classifer` Gear on those data prior to running the DICOM conversion Gear (dcm2niix). The "Classifier" Gear will set the input file's classification, upon which this Gear depends.
 
-* Once the classification is set, NIfTI files must be generated for data within the acquisition using the `scitran/dcm2niix` Gear (>=0.6). The `dcm2niix` Gear generates file metadata used to set the echo times for each of the given functional inputs.
+* **NIfTI files must be generated for data within the acquisition using the `scitran/dcm2niix` Gear (>=0.6)**. The `dcm2niix` Gear generates file metadata used to set the echo times and (importantly) derive slice timing for each of the given functional inputs. Slice timing information will subsequently be saved out as `slicetimes.txt`.
 
-* The `prefix` configuration parameter is parsed from the `subject code` and  `session label` within Flywheel. Please make sure those are set and valid prior to running the Gear.
+* **Please make sure that `subject code` and `session label` are set and valid prior to running the Gear.** The `prefix` configuration parameter is parsed from the `subject code` and  `session label` within Flywheel.
+
+### Configuration
+* Several configuration parameters can be set at runtime (see below). Please see the `manifest.json` file for the list of parameters and their options.
+
+```json
+  "basetime": {
+    "description": "ex: -b 10s OR -b 10v  Time to steady-state equilibration in seconds(s) or volumes(v). Default 0. ",
+    "default": "0",
+    "type": "string"
+  },
+  "mni": {
+    "description": "Warp to MNI standard space using high-resolution template.",
+    "default": false,
+    "type": "boolean"
+  },
+  "tr": {
+    "description": "The TR. Default read from input dataset header.",
+    "optional": true,
+    "type": "number"
+  },
+  "cpus": {
+    "description": "Maximum number of CPUs (OpenMP threads) to use. Default 2.",
+    "default": 2,
+    "type": "integer"
+  },
+  "no_axialize": {
+    "description": "Do not re-write dataset in axial-first order. Default is to axialize, recommended.",
+    "default": false,
+    "type": "boolean"
+  },
+  "keep_int": {
+    "description": "Keep preprocessing intermediates. Default delete.",
+    "default": false,
+    "type": "boolean"
+  }
+```

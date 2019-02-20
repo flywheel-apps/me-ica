@@ -1,5 +1,4 @@
 #!/bin/bash
-
 source /etc/afni/afni.sh
 Xvfb :88 -screen 0 1024x768x24 >& /dev/null &
 export DISPLAY=:88
@@ -7,4 +6,9 @@ export PYTHON_PATH=$PYTHON_PATH:/flywheel/v0/me-ica/
 python /flywheel/v0/run_meica.py
 exit_status=$?
 killall Xvfb
+if [[ $exit_status == "0" ]]; then
+  echo -e "MEICA success! (exit code = $exit_status)"
+else
+  echo -e "MEICA exited with non-zero status! (exit code = $exit_status)"
+fi
 exit $exit_status
