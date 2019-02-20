@@ -17,8 +17,9 @@ RUN apt-get update \
                           python-scipy \
                           python-pip \
                           xvfb \
-                          psmisc \
-    && pip install --upgrade flywheel-sdk
+                          psmisc
+
+RUN pip install --upgrade flywheel-sdk>=5.0.2
 
 # Make directory for flywheel spec (v0)
 ENV FLYWHEEL /flywheel/v0
