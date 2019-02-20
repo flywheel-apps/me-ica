@@ -40,7 +40,7 @@ This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-ech
 
 ### Input
 * The user must provide a single input file (DICOM archive containing multi-echo data) from the acquisition on which they wish this Gear to run. The Gear will use that single input file to identify other data within that acquisition to use as input to the algorithm.
-* The user may optionally provide an anatomical NIfTI file along with the functional input. Used for co-registration.
+* The user may optionally provide an anatomical NIfTI file along with the functional input. This input, if provided, will be used for co-registration.
 
 ### Configuration
 * Several configuration parameters can be set at runtime. Please see the `manifest.json` file for the list of parameters and their options.
@@ -48,6 +48,6 @@ This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-ech
 ### Prior to Execution
 * Data within the acquisition must have a Classification set for each file. The easiest way to do this is to run the `scitran/dicom-mr-classifer` Gear on those data prior to running the DICOM conversion Gear (dcm2niix). The "Classifier" Gear will set the input file's classification, upon which this Gear depends.
 
-* Once the classification is set, NIfTI files must be generated for data within the acquisition using the `scitran/dcm2niix` Gear (>=0.6). The `dcm2niix` Gear generates file metadata used to set the echo times for each of the given functional inputs.
+* Once the classification is set, NIfTI files must be generated for data within the acquisition using the `scitran/dcm2niix` Gear (>=0.6). The `dcm2niix` Gear generates file metadata used to set the echo times and slice timing for each of the given functional inputs.
 
 * The `prefix` configuration parameter is parsed from the `subject code` and  `session label` within Flywheel. Please make sure those are set and valid prior to running the Gear.
