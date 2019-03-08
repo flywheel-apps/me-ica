@@ -193,6 +193,7 @@ if __name__ == '__main__':
     cpus = config.get('config').get('cpus')
     no_axialize = config.get('config').get('no_axialize')
     keep_int = config.get('config').get('keep_int')
+    tpattern_gen = config.get('config').get('tpattern_gen')
 
 
     ############################################################################
@@ -210,7 +211,7 @@ if __name__ == '__main__':
         tpattern_cmd = '--tpattern=@%s' % (os.path.basename(slice_timing_input))
         log.info('Using user-provided slice-timing file...')
     else:
-        tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file else ''
+        tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file and tpattern_gen else ''
 
 
     # Run the command
