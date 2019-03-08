@@ -207,7 +207,7 @@ if __name__ == '__main__':
     tr_cmd = '--TR %s' % (str(tr)) if tr else ''
     cpus_cmd = '--cpus %s' % (str(cpus)) if cpus else ''
     no_axialize_cmd = '--no_axialize' if no_axialize else ''
-    native_cmd == '--native' if native else ''
+    native_cmd = '--native' if native else ''
     keep_int_cmd = '--keep_int' if keep_int else ''
     if slice_timing_input:
         tpattern_cmd = '--tpattern=@%s' % (os.path.basename(slice_timing_input))
