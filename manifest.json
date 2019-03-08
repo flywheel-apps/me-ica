@@ -55,6 +55,11 @@
       "description": "Use generated tpattern file from NIfTI header information in Flywheel. If a slice_timing file is not provided, this option will use the generated 'slicetimes.txt' file generated from the NIfTI metadata in Flywheel. Default=true",
       "default": true,
       "type": "boolean"
+    },
+    "native": {
+      "description": "Output native space results in addition to standard space results",
+      "default": false,
+      "type": "boolean"
     }
   },
   "inputs": {

@@ -192,6 +192,7 @@ if __name__ == '__main__':
         tr = repetition_time
     cpus = config.get('config').get('cpus')
     no_axialize = config.get('config').get('no_axialize')
+    native = config.get('config').get('native')
     keep_int = config.get('config').get('keep_int')
     tpattern_gen = config.get('config').get('tpattern_gen')
 
@@ -206,6 +207,7 @@ if __name__ == '__main__':
     tr_cmd = '--TR %s' % (str(tr)) if tr else ''
     cpus_cmd = '--cpus %s' % (str(cpus)) if cpus else ''
     no_axialize_cmd = '--no_axialize' if no_axialize else ''
+    native_cmd == '--native' if native else ''
     keep_int_cmd = '--keep_int' if keep_int else ''
     if slice_timing_input:
         tpattern_cmd = '--tpattern=@%s' % (os.path.basename(slice_timing_input))
@@ -215,7 +217,7 @@ if __name__ == '__main__':
 
 
     # Run the command
-    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s --prefix %s' % ( output_directory,
+    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s %s --prefix %s' % ( output_directory,
             dataset_cmd,
             echo_cmd,
             basetime,
@@ -224,6 +226,7 @@ if __name__ == '__main__':
             tr_cmd,
             cpus_cmd,
             no_axialize_cmd,
+            native_cmd,
             keep_int_cmd,
             tpattern_cmd,
             prefix )
