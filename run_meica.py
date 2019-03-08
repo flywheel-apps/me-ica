@@ -117,7 +117,7 @@ def get_meica_data(config, output_directory='/flywheel/v0/output'):
     label = acquisition.label.strip().replace(' ','')
     prefix = '%s_%s' % (sub_code, label)
 
-    # Generate tpattern_file
+    # Tpattern_file
     if slice_timing:
         log.info('Generating slice timing information from input file metadata.')
         tpattern_file = os.path.join(output_directory, 'slicetimes.txt')
@@ -172,6 +172,15 @@ if __name__ == '__main__':
     else:
         anatomical_nifti = ''
 
+    if config['inputs'].get('slice_timing'): # Optional
+        slice_timing_input = config['inputs'].get('slice_timing').get('location').get('path')
+
+        # File must be in the output directory when running meica
+        slice_timing_file = os.path.join(output_directory, os.path.basename(slice_timing_input))
+        shutil.copyfile(slice_timing_input, slice_timing_file)
+    else:
+        slice_timing_input = ''
+
 
     ############################################################################
     # CONFIG OPTIONS
@@ -197,7 +206,11 @@ if __name__ == '__main__':
     cpus_cmd = '--cpus %s' % (str(cpus)) if cpus else ''
     no_axialize_cmd = '--no_axialize' if no_axialize else ''
     keep_int_cmd = '--keep_int' if keep_int else ''
-    tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file else ''
+    if slice_timing_input:
+        tpattern_cmd = '--tpattern=@%s' % (os.path.basename(slice_timing_input))
+        log.info('Using user-provided slice-timing file...')
+    else:
+        tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file else ''
 
 
     # Run the command
