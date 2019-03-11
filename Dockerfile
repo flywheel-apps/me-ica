@@ -32,5 +32,8 @@ COPY manifest.json ${FLYWHEEL}/manifest.json
 # Clone ME-ICA code from source
 RUN git clone https://github.com/ME-ICA/me-ica.git
 
+# Create soft links of the atlases in the afni bin directory
+RUN for a in $(find /usr/share/afni/atlases/ -type f); do ln -s $a /usr/lib/afni/bin/$(basename $a); done
+
 # Configure entrypoint
 ENTRYPOINT ["/flywheel/v0/run"]
