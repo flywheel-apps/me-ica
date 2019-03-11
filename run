@@ -6,7 +6,7 @@ export PYTHON_PATH=$PYTHON_PATH:/flywheel/v0/me-ica/
 python /flywheel/v0/run_meica.py
 exit_status=$?
 killall Xvfb
-if [[ $exit_status == "0" ]] && [[ -n $(find /flywheel/v0/output/* -name "*medn.nii.gz") ]]; then
+if [[ $exit_status == "0" ]] && [[ -n $(find /flywheel/v0/output/* -name "*medn*.nii.gz") ]]; then
   echo -e "MEICA success! (exit code = $exit_status)"
   exit 0
 else
