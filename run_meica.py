@@ -117,7 +117,7 @@ def get_meica_data(config, output_directory='/flywheel/v0/output'):
     label = acquisition.label.strip().replace(' ','')
     prefix = '%s_%s' % (sub_code, label)
 
-    # Generate tpattern_file
+    # Tpattern_file
     if slice_timing:
         log.info('Generating slice timing information from input file metadata.')
         tpattern_file = os.path.join(output_directory, 'slicetimes.txt')
@@ -172,6 +172,15 @@ if __name__ == '__main__':
     else:
         anatomical_nifti = ''
 
+    if config['inputs'].get('slice_timing'): # Optional
+        slice_timing_input = config['inputs'].get('slice_timing').get('location').get('path')
+
+        # File must be in the output directory when running meica
+        slice_timing_file = os.path.join(output_directory, os.path.basename(slice_timing_input))
+        shutil.copyfile(slice_timing_input, slice_timing_file)
+    else:
+        slice_timing_input = ''
+
 
     ############################################################################
     # CONFIG OPTIONS
@@ -183,7 +192,9 @@ if __name__ == '__main__':
         tr = repetition_time
     cpus = config.get('config').get('cpus')
     no_axialize = config.get('config').get('no_axialize')
+    native = config.get('config').get('native')
     keep_int = config.get('config').get('keep_int')
+    tpattern_gen = config.get('config').get('tpattern_gen')
 
 
     ############################################################################
@@ -196,12 +207,17 @@ if __name__ == '__main__':
     tr_cmd = '--TR %s' % (str(tr)) if tr else ''
     cpus_cmd = '--cpus %s' % (str(cpus)) if cpus else ''
     no_axialize_cmd = '--no_axialize' if no_axialize else ''
+    native_cmd = '--native' if native else ''
     keep_int_cmd = '--keep_int' if keep_int else ''
-    tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file else ''
+    if slice_timing_input:
+        tpattern_cmd = '--tpattern=@%s' % (os.path.basename(slice_timing_input))
+        log.info('Using user-provided slice-timing file...')
+    else:
+        tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file and tpattern_gen else ''
 
 
     # Run the command
-    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s --prefix %s' % ( output_directory,
+    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s %s --prefix %s' % ( output_directory,
             dataset_cmd,
             echo_cmd,
             basetime,
@@ -210,6 +226,7 @@ if __name__ == '__main__':
             tr_cmd,
             cpus_cmd,
             no_axialize_cmd,
+            native_cmd,
             keep_int_cmd,
             tpattern_cmd,
             prefix )
