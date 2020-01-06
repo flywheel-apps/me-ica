@@ -195,7 +195,7 @@ if __name__ == '__main__':
     native = config.get('config').get('native')
     keep_int = config.get('config').get('keep_int')
     tpattern_gen = config.get('config').get('tpattern_gen')
-
+    tpattern_gen = config.get('config').get('daw')
 
     ############################################################################
     # RUN MEICA
@@ -217,7 +217,7 @@ if __name__ == '__main__':
 
 
     # Run the command
-    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s %s --prefix %s' % ( output_directory,
+    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s %s --prefix %s --daw %s' % ( output_directory,
             dataset_cmd,
             echo_cmd,
             basetime,
@@ -229,7 +229,8 @@ if __name__ == '__main__':
             native_cmd,
             keep_int_cmd,
             tpattern_cmd,
-            prefix )
+            prefix,
+            daw )
 
     log.info(command)
     status = os.system(command)

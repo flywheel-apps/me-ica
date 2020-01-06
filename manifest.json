@@ -60,6 +60,11 @@
       "description": "Output native space results in addition to standard space results",
       "default": false,
       "type": "boolean"
+    },
+    "daw": {
+      "description": "daw (lower if meica does not converge)",
+      "default": 10,
+      "type": "integer"
     }
   },
   "inputs": {
