@@ -30,7 +30,11 @@ RUN chmod +x ${FLYWHEEL}/*
 COPY manifest.json ${FLYWHEEL}/manifest.json
 
 # Clone ME-ICA code from source
-RUN git clone https://github.com/ME-ICA/me-ica.git
+ENV MEICACOMMIT da6ac4c23a59145530a16bd6f25c676460fe9436
+RUN git clone https://github.com/ME-ICA/me-ica.git && \
+    cd me-ica && \
+    git checkout $MEICACOMMIT && \
+    cd ..
 
 # Create soft links of the atlases in the afni bin directory
 RUN for a in $(find /usr/share/afni/atlases/ -type f); do ln -s $a /usr/lib/afni/bin/$(basename $a); done

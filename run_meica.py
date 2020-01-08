@@ -195,7 +195,7 @@ if __name__ == '__main__':
     native = config.get('config').get('native')
     keep_int = config.get('config').get('keep_int')
     tpattern_gen = config.get('config').get('tpattern_gen')
-    tpattern_gen = config.get('config').get('daw')
+    daw = config.get('config').get('daw')
 
     ############################################################################
     # RUN MEICA
