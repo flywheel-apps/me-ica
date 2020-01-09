@@ -215,7 +215,7 @@ if __name__ == '__main__':
     else:
         tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file and tpattern_gen else ''
 
-
+    # Adding comment to force a push
     # Run the command
     command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s %s --prefix %s --daw %s' % ( output_directory,
             dataset_cmd,
