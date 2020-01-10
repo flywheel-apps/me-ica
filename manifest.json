@@ -62,7 +62,7 @@
       "type": "boolean"
     },
     "daw": {
-      "description": "daw (lower if meica does not converge.)",
+      "description": "Daw is a weight use to control ICA dimensionality. It may be raised (e.g., from 10 to 20) to account for a low number of timepoints or lowered (e.g., from 10 to 5) if meica does not converge.",
       "default": 10,
       "type": "integer"
     }
