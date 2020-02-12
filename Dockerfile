@@ -20,7 +20,7 @@ RUN apt-get update \
                           psmisc
 
 RUN pip install --upgrade flywheel-sdk>=5.0.2
-
+RUN pip install psutil
 # Make directory for flywheel spec (v0)
 ENV FLYWHEEL /flywheel/v0
 WORKDIR ${FLYWHEEL}

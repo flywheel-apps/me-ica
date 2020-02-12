@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 
-import os
-import re
-import csv
+
 import json
 import shutil
-import string
+import psutil
 import zipfile
 import logging
 import datetime
 import flywheel
-from pprint import pprint
+import os
 
 logging.basicConfig()
-log = logging.getLogger('MEICA')
+log = logging.getLogger(__name__)
 
 
 def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True, deflate=True):
@@ -130,20 +128,37 @@ def get_meica_data(config, output_directory='/flywheel/v0/output'):
     return sorted(meica_data, key=lambda k: k['te']), prefix, tpattern_file, repetition_time
 
 
+
+def log_system_resources(log):
+    log.info('Logging System Resources\n\n==============================================================================\n')
+    try:
+        log.info('CPU Count: \t %s', psutil.cpu_count())
+        log.info('CPU Speed: \t %s', psutil.cpu_freq())
+        log.info('Virtual Memory: \t %s', psutil.virtual_memory())
+        log.info('Swap Memory: \t %s', psutil.swap_memory())
+        log.info('Disk Usage: \t %s', psutil.disk_usage('/'))
+    except Exception as e:
+        log.warning('Error Logging system info.  Attempted to retrieve the following:')
+        log.info('CPU Count')
+        log.info('CPU Speed')
+        log.info('Virtual Memory')
+        log.info('Swap Memory')
+        log.info('Disk Usage')
+        
+    log.info('\n\n==============================================================================\n')
+    
 if __name__ == '__main__':
     """
     Run meica on a given dataset.
     """
 
-    import os
-    import pprint
-    import shlex
-    import subprocess
+    
 
     log.setLevel(getattr(logging, 'DEBUG'))
     logging.getLogger('MEICA').setLevel(logging.INFO)
     log.info('  start: %s' % datetime.datetime.utcnow())
-
+    
+    log_system_resources(log)
 
     ############################################################################
     # READ CONFIG
