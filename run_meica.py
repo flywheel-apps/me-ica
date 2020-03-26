@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-
+import shlex
+import subprocess
 import json
 import shutil
 import psutil
@@ -9,9 +10,74 @@ import logging
 import datetime
 import flywheel
 import os
+import pprint
+from collections import OrderedDict
+
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
+
+
+meica_call_dict=OrderedDict()
+
+meica_call_dict["MNI"]=""
+meica_call_dict["qwarp"]=""
+meica_call_dict["native"]=""
+meica_call_dict["space"]=""
+meica_call_dict["fres"]=""
+meica_call_dict["no_skullstrip"]=""
+meica_call_dict["no_despike"]=""
+meica_call_dict["no_axialize"]=""
+meica_call_dict["mask_mode"]=""
+meica_call_dict["coreg_mode"]=""                                                                                                                               
+meica_call_dict["strict"]=""
+meica_call_dict["smooth"]=""
+meica_call_dict["align_base"]=""
+meica_call_dict["TR"]=""
+meica_call_dict["tpattern"]=""
+meica_call_dict["align_args"]=""
+meica_call_dict["ted_args"]=""
+meica_call_dict["select_only"]=""
+meica_call_dict["tedica_only"]=""
+meica_call_dict["export_only"]=""
+meica_call_dict["daw"]=""
+meica_call_dict["tlrc"]=""
+meica_call_dict["highpass"]=""
+meica_call_dict["detrend"]=""
+meica_call_dict["initcost"]=""
+meica_call_dict["finalcost"]=""
+meica_call_dict["sourceTEs"]=""
+meica_call_dict["prefix"]=""
+meica_call_dict["cpus"]=""
+meica_call_dict["label"]=""
+meica_call_dict["test_proc"]=""
+meica_call_dict["script_only"]=""
+meica_call_dict["pp_only"]=""
+meica_call_dict["keep_int"]=""
+meica_call_dict["skip_check"]=""
+meica_call_dict["RESUME"]=""
+meica_call_dict["OVERWRITE"]=""
+
+
+
+
+
+
+def generate_call(config_dict):
+    # this generates everything that comes in the meica.py call after the dataset and echo times
+    command_tail = ""
+    for key in meica_call_dict.keys():
+        if key in config_dict:
+            if isinstance(config_dict[key], bool) and config_dict[key]:
+                command_tail += '--{} '.format(key)
+            else:
+                command_tail += '--{} {} '.format(key,config_dict[key])
+    
+    return(command_tail)
+
+            
+
+
 
 
 def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True, deflate=True):

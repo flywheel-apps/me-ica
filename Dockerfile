@@ -1,43 +1,44 @@
 # Create a base docker container that will run ME-ICA
 #
 
-FROM neurodebian:bionic
+FROM dbp2123/afni:0.0.1_20.0.18
 MAINTAINER Flywheel <support@flywheel.io>
-
-
-# Install dependencies
-ARG DEBIAN_FRONTEND=noninteractive
-RUN echo deb http://neurodeb.pirsquared.org data main contrib non-free >> /etc/apt/sources.list.d/neurodebian.sources.list \
-    && echo deb http://neurodeb.pirsquared.org bionic main contrib non-free >> /etc/apt/sources.list.d/neurodebian.sources.list
-RUN apt-get update \
-    && apt-get install -y afni \
-                          python \
-                          git \
-                          python-numpy \
-                          python-scipy \
-                          python-pip \
-                          xvfb \
-                          psmisc
-
-RUN pip install --upgrade flywheel-sdk>=5.0.2
-RUN pip install psutil
-# Make directory for flywheel spec (v0)
-ENV FLYWHEEL /flywheel/v0
-WORKDIR ${FLYWHEEL}
-COPY run ${FLYWHEEL}/run
-COPY run_meica.py ${FLYWHEEL}/run_meica.py
-RUN chmod +x ${FLYWHEEL}/*
-COPY manifest.json ${FLYWHEEL}/manifest.json
-
-# Clone ME-ICA code from source
-ENV MEICACOMMIT da6ac4c23a59145530a16bd6f25c676460fe9436
-RUN git clone https://github.com/ME-ICA/me-ica.git && \
-    cd me-ica && \
-    git checkout $MEICACOMMIT && \
-    cd ..
-
-# Create soft links of the atlases in the afni bin directory
-RUN for a in $(find /usr/share/afni/atlases/ -type f); do ln -s $a /usr/lib/afni/bin/$(basename $a); done
+#
+#
+## Install dependencies
+#ARG DEBIAN_FRONTEND=noninteractive
+#RUN echo deb http://neurodeb.pirsquared.org data main contrib non-free >> /etc/apt/sources.list.d/neurodebian.sources.list \
+#    && echo deb http://neurodeb.pirsquared.org bionic main contrib non-free >> /etc/apt/sources.list.d/neurodebian.sources.list
+#RUN apt-get update \
+#    && apt-get install -y afni \
+#                          python \
+#                          git \
+#                          python-numpy \
+#                          python-scipy \
+#                          python-pip \
+#                          xvfb \
+#                          psmisc
+#
+#RUN pip install --upgrade flywheel-sdk>=5.0.2
+#RUN pip install psutil
+## Make directory for flywheel spec (v0)
+#ENV FLYWHEEL /flywheel/v0
+#WORKDIR ${FLYWHEEL}
+#COPY run ${FLYWHEEL}/run
+#COPY run_meica.py ${FLYWHEEL}/run_meica.py
+#RUN chmod +x ${FLYWHEEL}/*
+#COPY manifest.json ${FLYWHEEL}/manifest.json
+#
+## Clone ME-ICA code from source
+##ENV MEICACOMMIT da6ac4c23a59145530a16bd6f25c676460fe9436
+##RUN git clone https://github.com/ME-ICA/me-ica.git && \
+##    cd me-ica && \
+##    git checkout $MEICACOMMIT && \
+##    cd ..
+#
+#
+## Create soft links of the atlases in the afni bin directory
+#RUN for a in $(find /usr/share/afni/atlases/ -type f); do ln -s $a /usr/lib/afni/bin/$(basename $a); done
 
 # Configure entrypoint
 ENTRYPOINT ["/flywheel/v0/run"]
