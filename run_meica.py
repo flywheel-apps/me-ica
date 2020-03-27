@@ -144,7 +144,7 @@ def get_meica_data(config, output_directory='/flywheel/v0/output'):
     """
 
     # Flywheel Object
-    fw = flywheel.Flywheel(config['inputs']['api_key']['key'])
+    fw = flywheel.Client(config['inputs']['api_key']['key'])
 
     # For this acquisition find each nifti file, download it and note its echo time
     acquisition = fw.get_acquisition(config['inputs'].get('functional').get('hierarchy').get('id'))
@@ -267,16 +267,13 @@ if __name__ == '__main__':
     # CONFIG OPTIONS
 
     basetime = config.get('config').get('basetime') # Default = "0"
-    mni = config.get('config').get('mni') # Default = False
-    tr = config.get('config').get('tr', '') # No default
+    mni = config.get('config').get('MNI') # Default = False
+    tr = config.get('config').get('TR', '') # No default
     if not tr and repetition_time:
         tr = repetition_time
-    cpus = config.get('config').get('cpus')
-    no_axialize = config.get('config').get('no_axialize')
-    native = config.get('config').get('native')
-    keep_int = config.get('config').get('keep_int')
+        config['TR'] = tr
+        
     tpattern_gen = config.get('config').get('tpattern_gen')
-    daw = config.get('config').get('daw')
 
     ############################################################################
     # RUN MEICA
@@ -284,33 +281,26 @@ if __name__ == '__main__':
     dataset_cmd = '-d %s' % (','.join([ x['path'] for x in meica_data ]))
     echo_cmd = '-e %s' % (','.join([ str(x['te']) for x in meica_data ]))
     anatomical_cmd = '-a %s' % (os.path.basename(anatomical_nifti)) if anatomical_nifti else ''
-    mni_cmd = '--MNI' if mni else ''
-    tr_cmd = '--TR %s' % (str(tr)) if tr else ''
-    cpus_cmd = '--cpus %s' % (str(cpus)) if cpus else ''
-    no_axialize_cmd = '--no_axialize' if no_axialize else ''
-    native_cmd = '--native' if native else ''
-    keep_int_cmd = '--keep_int' if keep_int else ''
+   
     if slice_timing_input:
-        tpattern_cmd = '--tpattern=@%s' % (os.path.basename(slice_timing_input))
+        tpattern_cmd = os.path.basename(slice_timing_input)
         log.info('Using user-provided slice-timing file...')
+        
     else:
-        tpattern_cmd = '--tpattern=@%s' % (tpattern_file) if tpattern_file and tpattern_gen else ''
+        tpattern_cmd = tpattern_file if tpattern_file and tpattern_gen else ''
 
+    config['tpattern'] = tpattern_cmd
+    
     # Run the command
-    command = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s %s %s %s %s %s %s %s --prefix %s --daw %s' % ( output_directory,
+    command_head = 'cd %s && /flywheel/v0/me-ica/meica.py %s %s -b %s %s ' % (output_directory,
             dataset_cmd,
             echo_cmd,
             basetime,
-            anatomical_cmd,
-            mni_cmd,
-            tr_cmd,
-            cpus_cmd,
-            no_axialize_cmd,
-            native_cmd,
-            keep_int_cmd,
-            tpattern_cmd,
-            prefix,
-            daw )
+            anatomical_cmd)
+    
+    command_tail = generate_call(config)
+    
+    command = command_head + command_tail
 
     log.info(command)
     status = os.system(command)

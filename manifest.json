@@ -9,13 +9,14 @@
   "cite": "Kundu, P., Brenowitz, N.D., Voon, V., Worbe, Y., Vertes, P.E., Inati, S.J., Saad, Z.S., Bandettini, P.A. & Bullmore, E.T. Integrated strategy for improving functional connectivity mapping using multiecho fMRI. PNAS (2013). Kundu, P., Inati, S.J., Evans, J.W., Luh, W.M. & Bandettini, P.A. Differentiating BOLD and non-BOLD signals in fMRI time series using multi-echo EPI. NeuroImage (2011). http://dx.doi.org/10.1016/j.neuroimage.2011.12.028",
   "license": "Other",
   "flywheel": "0",
-  "version": "0.3.4_3.2beta1_dev1",
+  "version": "0.3.5_3.2beta1_dev4",
+  "command": "python3 /flywheel/v0/run_meica.py",
   "custom": {
     "gear-builder": {
       "category": "analysis",
-      "image": "flywheel/me-ica:0.3.4_3.2beta1_dev1"
+      "image": "flywheel/me-ica:0.3.5_3.2beta1_dev1"
     },
-    "docker-image": "flywheel/me-ica:0.3.4_3.2beta1_dev1",
+    "docker-image": "flywheel/me-ica:0.3.5_3.2beta1_dev1",
     "flywheel": {
       "suite": "AFNI"
     }
@@ -42,8 +43,9 @@
       "type": "boolean"
     },
     "fres": {
-      "description": "Specify functional voxel dim. in mm (iso.) for resampling during preprocessing. Default none. ex:",
-      "type": "number"
+      "description": "Specify functional voxel dim. in mm (iso.) for resampling during preprocessing. Default none.",
+      "type": "number",
+      "optional": true
     },
     "no_skullstrip": {
       "description": "Anatomical is already intensity-normalized and skull-stripped (if -a provided)",
@@ -88,8 +90,7 @@
         "func",
         "anat",
         "template"
-      ],
-      "optional": true
+      ]
     },
     "coreg_mode": {
       "description": "Coregistration with Local Pearson and T2* weights (default), or use align_epi_anat.py (edge method): use 'lp-t2s' or 'aea'",

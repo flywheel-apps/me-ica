@@ -20,14 +20,13 @@ MAINTAINER Flywheel <support@flywheel.io>
 #                          psmisc
 #
 #RUN pip install --upgrade flywheel-sdk>=5.0.2
-#RUN pip install psutil
 ## Make directory for flywheel spec (v0)
-#ENV FLYWHEEL /flywheel/v0
-#WORKDIR ${FLYWHEEL}
-#COPY run ${FLYWHEEL}/run
-#COPY run_meica.py ${FLYWHEEL}/run_meica.py
-#RUN chmod +x ${FLYWHEEL}/*
-#COPY manifest.json ${FLYWHEEL}/manifest.json
+ENV FLYWHEEL /flywheel/v0
+WORKDIR ${FLYWHEEL}
+COPY run ${FLYWHEEL}/run
+COPY run_meica.py ${FLYWHEEL}/run_meica.py
+RUN chmod +x ${FLYWHEEL}/*
+COPY manifest.json ${FLYWHEEL}/manifest.json
 #
 ## Clone ME-ICA code from source
 ##ENV MEICACOMMIT da6ac4c23a59145530a16bd6f25c676460fe9436
@@ -41,4 +40,3 @@ MAINTAINER Flywheel <support@flywheel.io>
 #RUN for a in $(find /usr/share/afni/atlases/ -type f); do ln -s $a /usr/lib/afni/bin/$(basename $a); done
 
 # Configure entrypoint
-ENTRYPOINT ["/flywheel/v0/run"]
