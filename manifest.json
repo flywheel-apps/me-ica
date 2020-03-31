@@ -9,7 +9,7 @@
   "cite": "Kundu, P., Brenowitz, N.D., Voon, V., Worbe, Y., Vertes, P.E., Inati, S.J., Saad, Z.S., Bandettini, P.A. & Bullmore, E.T. Integrated strategy for improving functional connectivity mapping using multiecho fMRI. PNAS (2013). Kundu, P., Inati, S.J., Evans, J.W., Luh, W.M. & Bandettini, P.A. Differentiating BOLD and non-BOLD signals in fMRI time series using multi-echo EPI. NeuroImage (2011). http://dx.doi.org/10.1016/j.neuroimage.2011.12.028",
   "license": "Other",
   "flywheel": "0",
-  "version": "0.3.5_3.2beta1_dev4",
+  "version": "0.3.6_3.2beta1_dev1",
   "command": "python3 /flywheel/v0/run_meica.py",
   "custom": {
     "gear-builder": {
@@ -69,11 +69,6 @@
     },
     "keep_int": {
       "description": "Keep preprocessing intermediates. Default delete.",
-      "default": false,
-      "type": "boolean"
-    },
-    "tpattern_gen": {
-      "description": "Use generated tpattern file from NIfTI header information in Flywheel. If a slice_timing file is not provided, this option will use the generated 'slicetimes.txt' file generated from the NIfTI metadata in Flywheel. Default=true",
       "default": false,
       "type": "boolean"
     },
@@ -187,11 +182,9 @@
       "type": "boolean"
     },
     "script_only": {
-      "description": "Generate script only, then exit. 0 = no, 1 = yes",
-      "default": 0,
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 1
+      "description": "Generate script only, then exit.",
+      "default": false,
+      "type": "boolean"
     },
     "pp_only": {
       "description": "Preprocess only, then exit.",
@@ -205,6 +198,11 @@
     },
     "skip_check": {
       "description": "Skip dependency checks during initialization.",
+      "default": false,
+      "type": "boolean"
+    },
+    "flywheel_save_output_on_error": {
+      "description": "If me-ica fails, save the current work space, including intermediate files.  Typically for debugging purposes",
       "default": false,
       "type": "boolean"
     }
