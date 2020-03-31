@@ -69,7 +69,8 @@ This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-ech
 * **TR**: The TR. Default read from input dataset header
 * **align_args**: Additional arguments to anatomical-functional co-registration routine
 * **ted_args**: Additional arguments to TE-dependence analysis routine  
-
+  
+  
 * **select_only**: Hidden option.  Only modify if you're an expert user
 * **tedica_only**: Hidden option.  Only modify if you're an expert user
 * **export_only**: Hidden option.  Only modify if you're an expert user
@@ -80,7 +81,8 @@ This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-ech
 * **initcost**: Hidden option.  Only modify if you're an expert user
 * **finalcost**: Hidden option.  Only modify if you're an expert user
 * **sourceTEs**: Hidden option.  Only modify if you're an expert user  
-  
+    
+    
 * **prefix**: prefPrefix for final ME-ICA output datasets
 * **cpus**: cpMaximum number of CPUs (OpenMP threads) to use
 * **label**: labLabel to tag ME-ICA analysis folder.
