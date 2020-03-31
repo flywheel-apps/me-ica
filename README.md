@@ -54,38 +54,38 @@ This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-ech
 ### Configuration
 * Several configuration parameters can be set at runtime (see below). Please see the `manifest.json` file for the list of parameters and their options.
 
-* **qwarp**: Nonlinear warp to standard space using QWarp (use --MNI or --space)  
-* **native**: Output native space results in addition to standard space results  
-* **space**: Path to specific standard space template for affine anatomical normalization  
-* **fres**: Specify functional voxel dim. in mm (iso.) for resampling during preprocessing.   
-* **no_skullstrip**: Anatomical is already intensity-normalized and skull-stripped (if -a provided)  
-* **no_despike**: Do not de-spike functional data. Default is to de-spike, recommended.  
-* **no_axialize**: Do not re-write dataset in axial-first order. Default is to axialize, recommended.  
-* **mask_mode**: Mask functional with help from anatomical or standard space images: use 'anat' or 'template'  
-* **coreg_mode**: Coregistration with Local Pearson and T2* weights (default), or use align_epi_anat.py (edge method): use 'lp-t2s' or 'aea'  
-* **strict**: Hidden option.  Only modify if you're an expert user   
-* **smooth**: FWData FWHM smoothing (3dBlurInMask). Default off. ex: --smooth 3mm  
-* **align_base**: align_baExplicitly specify base dataset for volume registration  
-* **TR**: The TR. Default read from input dataset header  
-* **align_args**: Additional arguments to anatomical-functional co-registration routine  
+* **qwarp**: Nonlinear warp to standard space using QWarp (use --MNI or --space)
+* **native**: Output native space results in addition to standard space results
+* **space**: Path to specific standard space template for affine anatomical normalization
+* **fres**: Specify functional voxel dim. in mm (iso.) for resampling during preprocessing.
+* **no_skullstrip**: Anatomical is already intensity-normalized and skull-stripped (if -a provided)
+* **no_despike**: Do not de-spike functional data. Default is to de-spike, recommended.
+* **no_axialize**: Do not re-write dataset in axial-first order. Default is to axialize, recommended.
+* **mask_mode**: Mask functional with help from anatomical or standard space images: use 'anat' or 'template'
+* **coreg_mode**: Coregistration with Local Pearson and T2* weights (default), or use align_epi_anat.py (edge method): use 'lp-t2s' or 'aea'
+* **strict**: Hidden option.  Only modify if you're an expert user
+* **smooth**: FWData FWHM smoothing (3dBlurInMask). Default off. ex: --smooth 3mm
+* **align_base**: align_baExplicitly specify base dataset for volume registration
+* **TR**: The TR. Default read from input dataset header
+* **align_args**: Additional arguments to anatomical-functional co-registration routine
 * **ted_args**: Additional arguments to TE-dependence analysis routine  
 
-* **select_only**: Hidden option.  Only modify if you're an expert user  
-* **tedica_only**: Hidden option.  Only modify if you're an expert user  
-* **export_only**: Hidden option.  Only modify if you're an expert user  
-* **daw**: Hidden option.  Only modify if you're an expert user  
-* **tlrc**: Hidden option.  Only modify if you're an expert user  
-* **highpass**: Hidden option.  Only modify if you're an expert user  
-* **detrend**: Hidden option.  Only modify if you're an expert user  
-* **initcost**: Hidden option.  Only modify if you're an expert user  
-* **finalcost**: Hidden option.  Only modify if you're an expert user  
+* **select_only**: Hidden option.  Only modify if you're an expert user
+* **tedica_only**: Hidden option.  Only modify if you're an expert user
+* **export_only**: Hidden option.  Only modify if you're an expert user
+* **daw**: Hidden option.  Only modify if you're an expert user
+* **tlrc**: Hidden option.  Only modify if you're an expert user
+* **highpass**: Hidden option.  Only modify if you're an expert user
+* **detrend**: Hidden option.  Only modify if you're an expert user
+* **initcost**: Hidden option.  Only modify if you're an expert user
+* **finalcost**: Hidden option.  Only modify if you're an expert user
 * **sourceTEs**: Hidden option.  Only modify if you're an expert user  
   
-* **prefix**: prefPrefix for final ME-ICA output datasets  
-* **cpus**: cpMaximum number of CPUs (OpenMP threads) to use  
-* **label**: labLabel to tag ME-ICA analysis folder.  
-* **test_proc**: test_prAlign and preprocess 1 dataset then exit, for testing  
-* **script_only**: script_onGenerate script only, then exit  
-* **pp_only**: Preprocess only, then exit.  
-* **keep_int**: Keep preprocessing intermediates. Default delete.  
-* **skip_check**: Skip dependency checks during initialization.  
+* **prefix**: prefPrefix for final ME-ICA output datasets
+* **cpus**: cpMaximum number of CPUs (OpenMP threads) to use
+* **label**: labLabel to tag ME-ICA analysis folder.
+* **test_proc**: test_prAlign and preprocess 1 dataset then exit, for testing
+* **script_only**: script_onGenerate script only, then exit
+* **pp_only**: Preprocess only, then exit.
+* **keep_int**: Keep preprocessing intermediates. Default delete.
+* **skip_check**: Skip dependency checks during initialization.
