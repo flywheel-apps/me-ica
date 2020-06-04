@@ -5,7 +5,7 @@ MAINTAINER Flywheel <support@flywheel.io>
 
 ENV FLYWHEEL /flywheel/v0
 WORKDIR ${FLYWHEEL}
-COPY run ${FLYWHEEL}/run
 COPY run_meica.py ${FLYWHEEL}/run_meica.py
-RUN chmod +x ${FLYWHEEL}/*
+COPY run.py ${FLYWHEEL}/run.py
+RUN chmod +x ${FLYWHEEL}/run.py ${FLYWHEEL}/run_meica.py 
 COPY manifest.json ${FLYWHEEL}/manifest.json

@@ -1,69 +1,80 @@
-#!/usr/bin/env python
-
-import shlex
-import subprocess
-import json
-import shutil
-import psutil
-import zipfile
-import logging
 import datetime
-import flywheel
+import json
+import logging
 import os
-import pprint
-from collections import OrderedDict
+from os import path as op
 from pathlib import Path
+import psutil
+import shutil
 import subprocess as sp
-import os.path as op
+import zipfile
+
+import flywheel
+
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
 
-meica_call_dict = OrderedDict()
 
-meica_call_dict["MNI"] = ""
-meica_call_dict["qwarp"] = ""
-meica_call_dict["native"] = ""
-meica_call_dict["space"] = ""
-meica_call_dict["fres"] = ""
-meica_call_dict["no_skullstrip"] = ""
-meica_call_dict["no_despike"] = ""
-meica_call_dict["no_axialize"] = ""
-meica_call_dict["mask_mode"] = ""
-meica_call_dict["coreg_mode"] = ""
-meica_call_dict["strict"] = ""
-meica_call_dict["smooth"] = ""
-meica_call_dict["align_base"] = ""
-meica_call_dict["TR"] = ""
-meica_call_dict["tpattern"] = ""
-meica_call_dict["align_args"] = ""
-meica_call_dict["ted_args"] = ""
-meica_call_dict["select_only"] = ""
-meica_call_dict["tedica_only"] = ""
-meica_call_dict["export_only"] = ""
-meica_call_dict["daw"] = ""
-meica_call_dict["tlrc"] = ""
-meica_call_dict["highpass"] = ""
-meica_call_dict["detrend"] = ""
-meica_call_dict["initcost"] = ""
-meica_call_dict["finalcost"] = ""
-meica_call_dict["sourceTEs"] = ""
-meica_call_dict["prefix"] = ""
-meica_call_dict["cpus"] = ""
-meica_call_dict["label"] = ""
-meica_call_dict["test_proc"] = ""
-meica_call_dict["script_only"] = ""
-meica_call_dict["pp_only"] = ""
-meica_call_dict["keep_int"] = ""
-meica_call_dict["skip_check"] = ""
-meica_call_dict["RESUME"] = ""
-meica_call_dict["OVERWRITE"] = ""
+meica_call_dict = ("MNI",
+                    "qwarp",
+                    "native",
+                    "space",
+                    "fres",
+                    "no_skullstrip",
+                    "no_despike",
+                    "no_axialize",
+                    "mask_mode",
+                    "coreg_mode",
+                    "strict",
+                    "smooth",
+                    "align_base",
+                    "TR",
+                    "tpattern",
+                    "align_args",
+                    "ted_args",
+                    "select_only",
+                    "tedica_only",
+                    "export_only",
+                    "daw",
+                    "tlrc",
+                    "highpass",
+                    "detrend",
+                    "initcost",
+                    "finalcost",
+                    "sourceTEs",
+                    "prefix",
+                    "cpus",
+                    "label",
+                    "test_proc",
+                    "script_only",
+                    "pp_only",
+                    "keep_int",
+                    "skip_check",
+                    "RESUME",
+                    "OVERWRITE")
 
 
 def generate_call(config_dict):
+    """ Generate the second half of the MEICA call
+        
+    This function loops
+    through all the keys in the config dictionary, and matches them to the keys in
+    meica_call_dict.  If the key is present in meica_call_dict, the value from
+    config_dict is used as the value for that key.  These keys are usd to build the
+    second half of the command call to run meica.  This call is returned as a string.
+    
+    Args:
+        config_dict (dict): The dictionary in the flywheel gear context "context.config"
+        that has all the configuration options set in the manifest.
+
+    Returns:
+        command_tail (str): The second half of the command call used to run meica.
+
+    """
     # this generates everything that comes in the meica.py call after the dataset and echo times
     command_tail = ""
-    for key in meica_call_dict.keys():
+    for key in meica_call_dict:
         log.debug('Checking Key {}'.format(key))
         if key in config_dict:
             log.debug('\tIn Config')
@@ -71,31 +82,52 @@ def generate_call(config_dict):
                 log.debug('\tBool In Config adding key')
                 command_tail += '--{} '.format(key)
             elif not isinstance(config_dict[key], bool) and config_dict[key] != "":
-                log.debug('\tVal In Config addind key/value')
+                log.debug('\tVal In Config adding key/value')
                 command_tail += '--{} {} '.format(key, config_dict[key])
 
     return (command_tail)
 
 
 def set_environment(environ_json='/tmp/gear_environ.json'):
+    """ Loads environment variables saved as a .json file into the current environment.
+    
+    Flywheel gears do not retain environmental settings when run on a flywheel instance.
+    Thus, any environment setup performed in the dockerfile is lost.  As a workaround,
+    these environmental variables are saved as a .json file as a final step in docker
+    image creation.  By convention, this file is saved as '/tmp/gear_environ.json'.
+    
+    Args:
+       environ_json (str or os.PathLike object): The location of a .json file containing
+       the environment variables to be loaded.
+    
+    """
+    
     # Let's ensure that we have our environment .json file and load it up
     if op.exists(environ_json):
-
+    
         # If it exists, read the file in as a python dict with json.load
         with open(environ_json, 'r') as f:
             log.info('Loading gear environment')
             environ = json.load(f)
-
-        # Now set the current environment using the keys.  This will automatically be used with any sp.run() calls,
-        # without the need to pass in env=...  Passing env= will unset all these variables, so don't use it if you do it
-        # this way.
+    
+        # Now set the current environment using the keys.  This will automatically be used with any
+        # sp.run() calls, without the need to pass "env=" into sp.run(), as in:
+        #  sp.run(<command>, env=<environment dictionary>) 
+        # https://docs.python.org/3/library/subprocess.html#subprocess.run
+        # Passing "env=" would unset all these variables, so you must leave it out of any sp.run() 
+        # calls
+        
         for key in environ.keys():
             log.debug('{}: {}'.format(key, environ[key]))
             os.environ[key] = environ[key]
     else:
-        log.warning('No Environment file found!')
-    # Pass back the environ dict in case the run.py program has need of it later on.
-    return environ
+        log.error('No Environment file found!')
+        log.warning('It is unlikely that this gear will be able to run without an environment file')
+        log.warning('Save the environment in the docker image using the following command:')
+        
+        raise Exception
+    
+    return
 
 
 def run_afni_command(command, output_directory):
@@ -178,7 +210,7 @@ def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True, deflate=True):
     outFile.close()
 
 
-def get_meica_data(context, output_directory='/flywheel/v0/output'):
+def get_meica_data(acquisition_id, api_key, output_directory='/flywheel/v0/output'):
     """
     For a given input dicom file, grab all of the nifti files from that acquisition.
 
@@ -186,10 +218,10 @@ def get_meica_data(context, output_directory='/flywheel/v0/output'):
     """
 
     # Flywheel Object
-    fw = flywheel.Client(context.get_input('api_key')['key'])
+    fw = flywheel.Client(api_key)
 
     # For this acquisition find each nifti file, download it and note its echo time
-    acquisition = fw.get_acquisition(context.get_input('functional')['hierarchy']['id'])
+    acquisition = fw.get_acquisition(acquisition_id)
     nifti_files = [x for x in acquisition.files
                    if x.type == 'nifti'
                    and "Functional" in x.classification['Intent']
@@ -204,18 +236,29 @@ def get_meica_data(context, output_directory='/flywheel/v0/output'):
         log.info('Downloading %s' % (n.name))
         fw.download_file_from_acquisition(acquisition.id, n.name, file_path)
         echo_time = n.info.get('EchoTime')
-
-        # TODO: Handle case where EchoTime is not here
+        
+        # IDEA:  Handle case where EchoTime is not here
         # or classification is not correct
         # Or not multi echo data
         # Or if coronavirus attack
-
+        
+        # Append a dict containing the path and te of this nifti file for easy sorting
         meica_data.append({
             "path": n.name,
             "te": echo_time * 1000  # Convert to ms
         })
 
     # Generate prefix
+    # The prefix of this command consists of multiple nifti files (one for each echo),
+    # Followed by the te of each nifti file.  Since a single dicom is passed into the
+    # gear, extra logic is needed to find the individual nifti files and automatically
+    # exctract their TE's. Because meica_data is a list of path/te dictionary pairs,
+    # a lamda function is used to sort them in order of their te.  That way, the files
+    # are in order of lowest to highest te, where meica_data[0] is lowest, and
+    # meica_data[-1] is highest.  The paths of the nifti files (ordered) and the te's
+    # (also ordered) are returned as lists, as it's more convenient to use them in that
+    # form later in the program.
+    
     sub_code = fw.get_session(acquisition.parents.session).subject.code.strip().replace(' ', '')
     label = acquisition.label.strip().replace(' ', '')
     prefix = '%s_%s' % (sub_code, label)
@@ -237,45 +280,38 @@ def log_system_resources(log):
         log.info('Swap Memory: \t %s', psutil.swap_memory())
         log.info('Disk Usage: \t %s', psutil.disk_usage('/'))
     except Exception as e:
-        log.warning('Error Logging system info.  Attempted to retrieve the following:')
-        log.info('CPU Count')
-        log.info('CPU Speed')
-        log.info('Virtual Memory')
-        log.info('Swap Memory')
-        log.info('Disk Usage')
+        log.warning('Error Logging system info. Attempted to retrieve the following: CPU Count,'
+                    ' CPU Speed, Virtual Memory, Swap Memory, Disk Usage')
 
     log.info('\n\n==============================================================================\n')
 
 
-if __name__ == '__main__':
-    """
-    Run meica on a given dataset.
-    """
-
+def setup_environment():
     context = flywheel.gear_context.GearContext()
-    config = context.config
-
-    log.setLevel(getattr(logging, 'DEBUG'))
-    logging.getLogger('MEICA').setLevel(logging.INFO)
+    log.setLevel(getattr(logging, context.config['gear-log-level']))
     log.info('  start: %s' % datetime.datetime.utcnow())
-
     log_system_resources(log)
-    environ = set_environment()
+    set_environment()
+    
+    return(context)
 
-    ############################################################################
-    # READ CONFIG
-    config = context.config
+
+def setup_input_data(context, output_directory):
+
 
     ############################################################################
     # FIND AND DOWNLOAD DATA
-    output_directory = '/flywheel/v0/output'
-    datasets, tes = get_meica_data(context, output_directory)
+    datasets, tes = get_meica_data(context.get_input('functional')['hierarchy']['id'],
+                                   context.get_input('api_key')['key'],
+                                   output_directory)
+    
+    return(datasets, tes)
 
-    ############################################################################
-    # INPUTS
 
-    anatomical_input = context.get_input_path('anatomical')
-    if anatomical_input:  # Optional
+def create_meica_call(datasets, tes, config, output_directory, context):
+    
+    if context.get_input_path('anatomical'):  # Optional
+        anatomical_input = context.get_input_path('anatomical')
         # Anatomical nifti must be in the output directory when running meica
         anatomical_nifti = os.path.join(output_directory, os.path.basename(anatomical_input))
         shutil.copyfile(anatomical_input, anatomical_nifti)
@@ -285,7 +321,6 @@ if __name__ == '__main__':
 
     if context.get_input_path('slice_timing'):  # Optional
         slice_timing_input = context.get_input_path('slice_timing')
-
         # File must be in the output directory when running meica
         slice_timing_file = os.path.join(output_directory, os.path.basename(slice_timing_input))
         shutil.copyfile(slice_timing_input, slice_timing_file)
@@ -303,23 +338,34 @@ if __name__ == '__main__':
     anatomical_cmd = '-a %s' % (os.path.basename(anatomical_nifti)) if anatomical_nifti else ''
 
 
-    # Run the command
-
+    # create the command head
     command_head = 'cd %s && /me-ica/meica.py %s %s -b %s %s ' % (output_directory, dataset_cmd,
                                                                   echo_cmd,
                                                                   basetime,
                                                                   anatomical_cmd)
-
+    # Create the command tail
     command_tail = generate_call(config)
-
+    
+    # Append the two parts
     command = command_head + command_tail
-
     log.debug(command)
+    
+    return(command)
+
+
+def run_meica_call(command, output_directory):
+    
+    
     os.chdir(output_directory)
     log.debug('Changed working directory to {}'.format(output_directory))
     status = run_afni_command(command, output_directory)
-
-    if status == 0 or context.config['flywheel_save_output_on_error']:
+    return(status)
+    
+    
+def cleanup(status, config, output_directory):
+    
+    
+    if status == 0 or config['flywheel_save_output_on_error']:
 
         if not config['script_only']:
             log.info('Command exited with {} status. Compressing outputs...'.format(status))
@@ -340,8 +386,7 @@ if __name__ == '__main__':
         log.info(
             'To save outputs on crash, check "flywheel_save_output_on_error" in the config options')
         cmd = '/bin/rm -rf /flywheel/v0/output/*'
-        os.system(command)
+        os.system(cmd)
 
     log.info('Done: %s' % datetime.datetime.utcnow())
 
-    os.sys.exit(status)
