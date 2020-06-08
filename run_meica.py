@@ -130,10 +130,27 @@ def set_environment(environ_json='/tmp/gear_environ.json'):
     return
 
 
-def run_afni_command(command, output_directory):
-    # We need to be operating in the output directory.
-    os.chdir(output_directory)
+def run_meica_call(command, output_directory):
+    """ Runs the MEICA afni command constructed by this program
+    
+    This calls the bash command generated in this program.  The return code is evaluated
+    to inform how this function exits.  If there is an error (return code != 0), log an
+    error message and return the return code.  Otherwise, simply return the return code.
+    An exception is not raised so that program flow can be controlled at a higher level.
+    
+    Args:
+        command (str): the bash command call in string format (not list).  Afni is run
+        with shell=True because it's a pain to get working otherwise.
+        output_directory (str): a working directory that this function navigates to, to
+        catch any output.
+    Returns:
+        returncode (int): the returncode of the command call.
 
+    """
+    # We need to be operating in the output directory.
+    log.debug('Changed working directory to {}'.format(output_directory))
+    os.chdir(output_directory)
+    
     # Print the command (also a test of the sp.Popen call)
     echo_command = ['echo']
     echo_command.extend(command.split())
@@ -144,7 +161,7 @@ def run_afni_command(command, output_directory):
     pr.wait()
     pr.communicate()
     if pr.returncode != 0:
-        log.critical('Error executing main processing script.')
+        log.error('Error executing main processing script.')
         return (pr.returncode)
 
     # If we make it here, pr.returncode is zero
@@ -210,11 +227,31 @@ def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True, deflate=True):
     outFile.close()
 
 
-def get_meica_data(acquisition_id, api_key, output_directory='/flywheel/v0/output'):
-    """
-    For a given input dicom file, grab all of the nifti files from that acquisition.
+def setup_input_data(acquisition_id, api_key, output_directory='/flywheel/v0/output'):
+    """For a given input dicom file, grab all of the nifti files from that acquisition.
+    
+    It's more convenient for a user to select one input file than three (or potentially
+    more in the case of multi-echo fMRI).  To this end, the user only has to select the
+    original dicom that the multi echo nifti files came from.  The sdk then explores the
+    dicom's acquisition container, looking for the associated nifti files.  These are
+    downloaded and returned as a list of paths to the file.
 
-    Return MEICA data which is a sorted list of file objects.
+    
+    
+    Args:
+        acquisition_id (str): the unique flywheel ID of the acquisition containing the
+        nifti files to load
+        api_key (str): the api key needed to access this data.
+        output_directory (str): the output directory, intended to be the "flywheel"
+        output directory that returns its data to the analysis container.  This is where
+        the nifti files are downloaded to.  They're stored this way so that the user can
+        see exactly which files were used, since only a dicom is specified at the input.
+
+    Returns:
+        datasets (list): an ordered list of path locations, one element for each nifti
+        file.
+        tes (list): an ordered list of te's , where the order is associated with the
+        nifti files specified in the datasets list.
     """
 
     # Flywheel Object
@@ -271,6 +308,15 @@ def get_meica_data(acquisition_id, api_key, output_directory='/flywheel/v0/outpu
 
 
 def log_system_resources(log):
+    """Log system resource information
+    
+    Log system resource information to help with debugging.  In the event of job failure, it should
+    be verified that there was sufficient memory to complete the task.
+    
+    Args:
+        log (logging.Logger): the log being used in this script
+
+    """
     log.info(
         'Logging System Resources\n\n==============================================================================\n')
     try:
@@ -287,6 +333,15 @@ def log_system_resources(log):
 
 
 def setup_environment():
+    """Set up the program environment
+    
+    Sets up the logger at the desired log level, logs the start time of the gear, logs
+    the system resources, and sets up environmental variables
+    
+    Returns:
+        context (flywheel.gear_context.GearContext): the gear context
+
+    """
     context = flywheel.gear_context.GearContext()
     log.setLevel(getattr(logging, context.config['gear-log-level']))
     log.info('  start: %s' % datetime.datetime.utcnow())
@@ -296,19 +351,25 @@ def setup_environment():
     return(context)
 
 
-def setup_input_data(context, output_directory):
-
-
-    ############################################################################
-    # FIND AND DOWNLOAD DATA
-    datasets, tes = get_meica_data(context.get_input('functional')['hierarchy']['id'],
-                                   context.get_input('api_key')['key'],
-                                   output_directory)
-    
-    return(datasets, tes)
-
 
 def create_meica_call(datasets, tes, config, output_directory, context):
+    """Create the bash MEICA call
+    
+    
+    Create the bash MEICA call used by AFNI to perform multi-echo analysis.
+    Args:
+        datasets (list): an ordered list of paths to the nifti files being used in the 
+        analysis.  Order must match the order of te's in the "te" input list
+        tes (list): an ordered list of te's associated with the nifti files in
+        "datasets"
+        config (dict): the gear config settings
+        output_directory (str): the output directory of the flywheel gear
+        context (flywheel.gear_context.GearContext): the gear context
+
+    Returns:
+        command (str): The bash command to be called.
+
+    """
     
     if context.get_input_path('anatomical'):  # Optional
         anatomical_input = context.get_input_path('anatomical')
@@ -352,17 +413,20 @@ def create_meica_call(datasets, tes, config, output_directory, context):
     
     return(command)
 
-
-def run_meica_call(command, output_directory):
-    
-    
-    os.chdir(output_directory)
-    log.debug('Changed working directory to {}'.format(output_directory))
-    status = run_afni_command(command, output_directory)
-    return(status)
     
     
 def cleanup(status, config, output_directory):
+    """Cleanup output directory for easier viewing
+    
+    Cleanup the output directory by zipping folders/outputs for easy viewing/downloading on flywheel
+    
+    Args:
+        status (int): the exit status of the MEICA call
+        config (dict): the gear config settings
+        output_directory (str): the output directory where the files are saved.
+
+
+    """
     
     
     if status == 0 or config['flywheel_save_output_on_error']:

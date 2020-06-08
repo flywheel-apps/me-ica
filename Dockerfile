@@ -9,3 +9,9 @@ COPY run_meica.py ${FLYWHEEL}/run_meica.py
 COPY run.py ${FLYWHEEL}/run.py
 RUN chmod +x ${FLYWHEEL}/run.py ${FLYWHEEL}/run_meica.py 
 COPY manifest.json ${FLYWHEEL}/manifest.json
+
+# Save the environment for later use in the Run script (run.py)
+RUN python3 -c 'import os, json; f = open("/tmp/gear_environ.json", "w"); json.dump(dict(os.environ), f)'
+
+ENTRYPOINT /bin/bash
+

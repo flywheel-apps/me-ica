@@ -12,7 +12,9 @@ def main():
     output_directory = context.output_dir
     
     # Setup the necessary input files
-    datasets, tes = run_meica.setup_input_data(context, output_directory)
+    datasets, tes = run_meica.setup_input_data(context.get_input('functional')['hierarchy']['id'],
+                                               context.get_input('api_key')['key'],
+                                               output_directory)
     
     # create the full command call from the inputs and config settings
     command = run_meica.create_meica_call(datasets, tes, config, output_directory, context)
