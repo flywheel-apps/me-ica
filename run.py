@@ -7,7 +7,7 @@ import run_meica
 def main():
     
     # Setup the gear environment
-    context = run_meica.set_environment()
+    context = run_meica.setup_environment()
     config = context.config
     output_directory = context.output_dir
     

@@ -55,29 +55,30 @@ This Analysis Gear will execute ME-ICA within the Flywheel platform on multi-ech
 * Several configuration parameters can be set at runtime (see below). 
 
 * **align_args**: Additional arguments to anatomical-functional co-registration routine
-* **align_base**: align_baExplicitly specify base dataset for volume registration
+* **align_base**: Explicitly specify base dataset for volume registration
 * **coreg_mode**: Coregistration with Local Pearson and T2* weights (default), or use align_epi_anat.py (edge method)
-* **cpus**: cpMaximum number of CPUs (OpenMP threads) to use
+* **cpus**: Maximum number of CPUs (OpenMP threads) to use
 * **fres**: Specify functional voxel dim. in mm (iso.) for resampling during preprocessing.
 * **keep_int**: Keep preprocessing intermediates. Default delete.
-* **label**: labLabel to tag ME-ICA analysis folder.
+* **label**: Label to tag ME-ICA analysis folder.
 * **mask_mode**: Mask functional with help from anatomical or standard space images
 * **native**: Output native space results in addition to standard space results
 * **no_axialize**: Do not re-write dataset in axial-first order. Default is to axialize, recommended.
 * **no_despike**: Do not de-spike functional data. Default is to de-spike, recommended.
 * **no_skullstrip**: Anatomical is already intensity-normalized and skull-stripped (if -a provided)
 * **pp_only**: Preprocess only, then exit.
-* **prefix**: prefPrefix for final ME-ICA output datasets
+* **prefix**: Prefix for final ME-ICA output datasets
 * **qwarp**: Nonlinear warp to standard space using QWarp
-* **script_only**: script_onGenerate script only, then exit
+* **script_only**: Generate script only, then exit
 * **skip_check**: Skip dependency checks during initialization.
 * **smooth**: FWData FWHM smoothing (3dBlurInMask). Default off
 * **space**: Path to specific standard space template for affine anatomical normalization
 * **ted_args**: Additional arguments to TE-dependence analysis routine
-* **test_proc**: test_prAlign and preprocess 1 dataset then exit, for testing
+* **test_proc**: Align and preprocess 1 dataset then exit, for testing
 * **TR**: The TR. Default read from input dataset header
 
-There are also a series of options that are hidden from the user in the actual MEICA program.  It is our understanding that advanced users do utilize these options from time to time.  Therefor, we expose those options here, however they are undocumented, so we recommend that you do not use these options unless you're CERTAIN you know what they do, and are familliar with them.
+There are also a series of options that are hidden from the user in the underlying MEICA program. It is our understanding that advanced users do utilize these options from time to time. Therefore, we expose those options here; however, they are undocumented, so we recommend that you do not use these options unless you're CERTAIN you know what they do, and are familiar with them.  
+
 
 * **daw**: Hidden option.  Only modify if you're an expert user
 * **detrend**: Hidden option.  Only modify if you're an expert user
