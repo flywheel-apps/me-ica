@@ -1,2 +1,2 @@
-flywheel-sdk==15.8.0
+flywheel-sdk==14.6.2
 psutil==5.8.0
