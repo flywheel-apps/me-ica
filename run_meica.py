@@ -259,10 +259,35 @@ def setup_input_data(acquisition_id, api_key, output_directory='/flywheel/v0/out
 
     # For this acquisition find each nifti file, download it and note its echo time
     acquisition = fw.get_acquisition(acquisition_id)
-    nifti_files = [x for x in acquisition.files
-                   if x.type == 'nifti'
-                   and "Functional" in x.classification['Intent']
-                   ]
+    nifti_files = []
+    for file_ in acquisition.files:
+
+        # Skip if it's not a nifti file
+        if file_.type != 'nifti':
+            log.debug("Skipping file '%s' because it's not type nifti" % file_.name)
+            continue
+
+        # Skip if intent returns None
+        intent = file_.get('Intent')
+        if intent is None:
+            log.debug("Skipping file '%s' since could returned 'Intent' key is"
+                      "not in file.classification" % file_.name)
+            continue
+
+        # Raise error if it's not a list (for sanity)
+        if not isinstance(intent, list):
+            raise TypeError("Value for 'Intent' key in file_.classification "
+                            "should be type list, got '%s'" % type(intent))
+
+        # Skip if it's not a Functional file
+        if 'Functional' not in intent:
+            log.debug("Skipping file '%s' since did not find 'Functional' in "
+                      "file.classification['Intent']" % file_.name)
+            continue
+
+        # all criteria met
+        nifti_files.append(file_)
+
     log.info('Found %d Functional NIfTI files in %s' % (len(nifti_files), acquisition.label))
 
     # Compile meica_data structure
