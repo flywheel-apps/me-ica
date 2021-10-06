@@ -261,7 +261,7 @@ def setup_input_data(acquisition_id, api_key, output_directory='/flywheel/v0/out
     acquisition = fw.get_acquisition(acquisition_id)
     nifti_files = []
     for file_ in acquisition.files:
-        classification = file.get('classification')
+        classification = file_.get('classification')
 
         # Skip if it's not a nifti file
         if file_.type != 'nifti':
