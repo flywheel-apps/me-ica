@@ -261,6 +261,7 @@ def setup_input_data(acquisition_id, api_key, output_directory='/flywheel/v0/out
     acquisition = fw.get_acquisition(acquisition_id)
     nifti_files = []
     for file_ in acquisition.files:
+        classification = file.get('f.classification')
 
         # Skip if it's not a nifti file
         if file_.type != 'nifti':
@@ -268,7 +269,7 @@ def setup_input_data(acquisition_id, api_key, output_directory='/flywheel/v0/out
             continue
 
         # Skip if intent returns None
-        intent = file_.get('Intent')
+        intent = classification.get('Intent')
         if intent is None:
             log.debug("Skipping file '%s' since could returned 'Intent' key is"
                       "not in file.classification" % file_.name)
