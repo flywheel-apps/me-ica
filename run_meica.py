@@ -15,7 +15,6 @@ import flywheel
 logging.basicConfig()
 log = logging.getLogger(__name__)
 
-
 meica_call_dict = ("MNI",
                     "qwarp",
                     "native",
