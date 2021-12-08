@@ -1,8 +1,9 @@
 # Create a base docker container that will run ME-ICA
 
-FROM dbp2123/afni:0.0.1_20.0.18
+FROM dbp2123/afni:0.0.2_20.0.18
 MAINTAINER Flywheel <support@flywheel.io>
 
+RUN git clone https://github.com/ME-ICA/me-ica.git
 ENV FLYWHEEL /flywheel/v0
 WORKDIR ${FLYWHEEL}
 COPY run_meica.py ${FLYWHEEL}/run_meica.py
