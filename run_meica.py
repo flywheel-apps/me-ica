@@ -162,12 +162,11 @@ def run_meica_call(command, output_directory):
     pr.communicate()
     if pr.returncode != 0:
         log.error('Error executing main processing script.')
-        return (pr.returncode)
+        return pr.returncode
 
     # If we make it here, pr.returncode is zero
-    return (pr.returncode)
-    # I'm going to keep using parenthesis around return statements.  I've been hurt before with 
-    # Print statements from python2 -> 3, I'm not making that same mistake twice.
+    return pr.returncode
+
 
 
 def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True, deflate=True):

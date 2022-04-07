@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import os
-
 import run_meica
 
 def main():
