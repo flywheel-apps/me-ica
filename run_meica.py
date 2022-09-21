@@ -260,9 +260,19 @@ def setup_input_data(acquisition_id, api_key, output_directory='/flywheel/v0/out
     acquisition = fw.get_acquisition(acquisition_id)
     nifti_files = [x for x in acquisition.files
                    if x.type == 'nifti'
-                   and "Functional" in x.classification['Intent']
+                   and "Functional" in x.classification.get('Intent')
                    ]
+
     log.info('Found %d Functional NIfTI files in %s' % (len(nifti_files), acquisition.label))
+
+    # Check for nifti files that don't have "Intent" and warn.
+    no_intent = [x for x in acquisition.files
+                if x.type == 'nifti'
+                and x.classification.get('Intent') is None
+                ]
+
+    if len(no_intent) > 0:
+        log.warning(f"Found {len(no_intent)} Nifti files without 'Intent' Labels.")
 
     # Compile meica_data structure
     meica_data = []
