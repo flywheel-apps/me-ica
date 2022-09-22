@@ -19,5 +19,5 @@ COPY manifest.json ${FLYWHEEL}/manifest.json
 # Save the environment for later use in the Run script (run.py)
 RUN python3 -c 'import os, json; f = open("/tmp/gear_environ.json", "w"); json.dump(dict(os.environ), f)'
 
-ENTRYPOINT /bin/bash
+ENTRYPOINT ["python3", "/flywheel/v0/run.py"]
 
