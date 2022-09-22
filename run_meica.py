@@ -15,6 +15,7 @@ import flywheel
 logging.basicConfig()
 log = logging.getLogger(__name__)
 
+
 meica_call_dict = ("MNI",
                     "qwarp",
                     "native",
@@ -161,12 +162,11 @@ def run_meica_call(command, output_directory):
     pr.communicate()
     if pr.returncode != 0:
         log.error('Error executing main processing script.')
-        return (pr.returncode)
+        return pr.returncode
 
     # If we make it here, pr.returncode is zero
-    return (pr.returncode)
-    # I'm going to keep using parenthesis around return statements.  I've been hurt before with 
-    # Print statements from python2 -> 3, I'm not making that same mistake twice.
+    return pr.returncode
+
 
 
 def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True, deflate=True):
@@ -258,37 +258,21 @@ def setup_input_data(acquisition_id, api_key, output_directory='/flywheel/v0/out
 
     # For this acquisition find each nifti file, download it and note its echo time
     acquisition = fw.get_acquisition(acquisition_id)
-    nifti_files = []
-    for file_ in acquisition.files:
-        classification = file_.get('classification')
-
-        # Skip if it's not a nifti file
-        if file_.type != 'nifti':
-            log.debug("Skipping file '%s' because it's not type nifti" % file_.name)
-            continue
-
-        # Skip if intent returns None
-        intent = classification.get('Intent')
-        if intent is None:
-            log.debug("Skipping file '%s' since could returned 'Intent' key is"
-                      "not in file.classification" % file_.name)
-            continue
-
-        # Raise error if it's not a list (for sanity)
-        if not isinstance(intent, list):
-            raise TypeError("Value for 'Intent' key in file_.classification "
-                            "should be type list, got '%s'" % type(intent))
-
-        # Skip if it's not a Functional file
-        if 'Functional' not in intent:
-            log.debug("Skipping file '%s' since did not find 'Functional' in "
-                      "file.classification['Intent']" % file_.name)
-            continue
-
-        # all criteria met
-        nifti_files.append(file_)
+    nifti_files = [x for x in acquisition.files
+                   if x.type == 'nifti'
+                   and "Functional" in x.classification.get('Intent')
+                   ]
 
     log.info('Found %d Functional NIfTI files in %s' % (len(nifti_files), acquisition.label))
+
+    # Check for nifti files that don't have "Intent" and warn.
+    no_intent = [x for x in acquisition.files
+                if x.type == 'nifti'
+                and x.classification.get('Intent') is None
+                ]
+
+    if len(no_intent) > 0:
+        log.warning(f"Found {len(no_intent)} Nifti files without 'Intent' Labels.")
 
     # Compile meica_data structure
     meica_data = []
@@ -398,17 +382,9 @@ def create_meica_call(datasets, tes, config, output_directory, context):
     
     if context.get_input_path('anatomical'):  # Optional
         anatomical_input = context.get_input_path('anatomical')
-        #Anatomical nifti must be in the output directory when running meica
+        # Anatomical nifti must be in the output directory when running meica
         anatomical_nifti = os.path.join(output_directory, os.path.basename(anatomical_input))
-
-        if os.path.exists(anatomical_nifti):
-            basename = os.path.basename(anatomical_input)
-            first_dot = basename.find('.')
-            basename = basename[:first_dot]+"_T1"+basename[first_dot:]
-            anatomical_nifti = os.path.join(output_directory, basename)
-
         shutil.copyfile(anatomical_input, anatomical_nifti)
-        # anatomical_nifti = context.get_input_path('anatomical')
         log.info('anatomical_nifti: {}'.format(anatomical_nifti))
     else:
         anatomical_nifti = ''
@@ -429,7 +405,8 @@ def create_meica_call(datasets, tes, config, output_directory, context):
 
     dataset_cmd = '-d %s' % (','.join([str(x) for x in datasets]))
     echo_cmd = '-e %s' % (','.join([str(x) for x in tes]))
-    anatomical_cmd = '-a %s' % os.path.basename(anatomical_nifti) if anatomical_nifti else ''
+    anatomical_cmd = '-a %s' % (os.path.basename(anatomical_nifti)) if anatomical_nifti else ''
+
 
     # create the command head
     command_head = 'cd %s && /me-ica/meica.py %s %s -b %s %s ' % (output_directory, dataset_cmd,
@@ -445,8 +422,8 @@ def create_meica_call(datasets, tes, config, output_directory, context):
     
     return(command)
 
-
-
+    
+    
 def cleanup(status, config, output_directory):
     """Cleanup output directory for easier viewing
     
