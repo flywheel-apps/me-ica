@@ -379,12 +379,18 @@ def create_meica_call(datasets, tes, config, output_directory, context):
         command (str): The bash command to be called.
 
     """
-    
+
     if context.get_input_path('anatomical'):  # Optional
         anatomical_input = context.get_input_path('anatomical')
         # Anatomical nifti must be in the output directory when running meica
         anatomical_nifti = os.path.join(output_directory, os.path.basename(anatomical_input))
+        if os.path.exists(anatomical_nifti):
+            basename = os.path.basename(anatomical_input)
+            first_dot = basename.find('.')
+            basename = basename[:first_dot] + "_T1" + basename[first_dot:]
+            anatomical_nifti = os.path.join(output_directory, basename)
         shutil.copyfile(anatomical_input, anatomical_nifti)
+        # anatomical_nifti = context.get_input_path('anatomical')
         log.info('anatomical_nifti: {}'.format(anatomical_nifti))
     else:
         anatomical_nifti = ''
